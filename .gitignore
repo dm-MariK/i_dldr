@@ -1,0 +1,6 @@
+# Exclude the actual config with personal data
+config.py
+
+# Exclude Python Cache
+__pycache__/
+*.pyc
