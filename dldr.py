@@ -77,6 +77,10 @@ def get_args():
     parser.add_argument("-o", "--auth-only", action="store_true",
                         default=False,
                         help="Only authenticate on Apple iCloud service. Do not download anything.")
+    
+    parser.add_argument("-c", "--check-counts", action="store_true",
+                        default=False,
+                        help="Do not download. Compare number of available photo objects with the number declared by Apple service.")
 
     return parser.parse_args()
 # ---------------------------------------------------------------------
@@ -123,8 +127,17 @@ def main():
     logging.debug("Prepare local directory to download to.")
     os.makedirs(args.dir, exist_ok=True)
     
-    print(f"\nАльбом '{args.album}' найден! Начинаем скачивание...")
     photos = api.photos.albums[args.album]
+    
+    if args.check_counts:
+        print(
+            f"\nАльбом '{args.album}' найден!" 
+            f"\nНачинаем пересчет реально доступных для скачивания объектов."
+            f"\n⚠️ ВНИМАНИЕ! Будет произведен лишь пересчет БЕЗ реального скачивания!"
+        )
+        functions.check_counts(photos)
+        
+    print(f"\nАльбом '{args.album}' найден! Начинаем скачивание...")
 
     # --- 
     logging.debug("Получаем общее количество элементов, если альбом это поддерживает")

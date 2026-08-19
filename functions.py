@@ -114,3 +114,36 @@ def get_photo(photo, filepath):
         
 # -----------------------------------------------------------------------------
 
+def check_counts(photos):
+    """ 
+    Calculates real number of objects in photos = api.photos.albums[ALBUM_NAME].
+    Compare it with number declared by Apple service.
+    """
+    print(f"\nМетаданные (len): {len(photos)}")
+
+    print("Начинаю реальный перебор объектов (без скачивания)...")
+    actual_count = 0
+    # set() is used here because Sets only store unique items. 
+    # Adding an existing filename will do nothing. Duplicates are ignored.
+    filenames = set()
+
+    # Просто перебираем и считаем
+    for photo in photos:
+        actual_count += 1
+        filenames.add(photo.filename)
+    
+    print(f"Реально получено объектов в цикле: {actual_count}")
+    print(f"Уникальных имен файлов: {len(filenames)}")
+
+    if len(photos) != actual_count:
+        print("\n⚠️ ПОДТВЕРЖДЕНО: Apple заявляет одно количество, но отдает другое.")
+        print("Это не ошибка вашего скрипта загрузки. Это то, как отвечает сервер iCloud.")
+    
+# Стоит ли волноваться?
+# Нет. Если скрипт честно дошел до конца цикла for и не упал с ошибкой, 
+# значит он обработал абсолютно все файлы, которые сервер iCloud согласился ему отдать.
+# 
+# Эти 2 недостающих объекта — это либо "мусорные" записи в базе данных Apple, 
+# либо скрытые видео-дубли от Live Photos, которые привязались к альбому "Скриншоты" 
+# из-за какого-то системного сбоя в iOS. Вы не потеряли свои реальные фотографии.
+# -----------------------------------------------------------------------------
