@@ -201,12 +201,19 @@ def main():
         filepath, rel_path = functions.gen_local_path(photo, args.dir)
         
         if os.path.exists(filepath):
-            print(
-                f"Объект {idx} из {total_count}. Уже скачано, пропускаем: {rel_path}"
-            )
-            skipped_count += 1
-            idx += 1
-            continue
+            local_size = os.path.getsize(filepath)
+            if local_size == photo.size:
+                print(
+                    f"Объект № {idx} из {total_count}. Уже скачано, пропускаем: {rel_path}"
+                )
+                skipped_count += 1
+                idx += 1
+                continue
+            else:
+                print(
+                    f"Объект № {idx} из {total_count}. \n" 
+                    f"   * Локальный файл {rel_path} поврежден или не докачан. Будет перекачан с нуля."
+                )
 
         print(
             f"Объект {idx} из {total_count}. Скачивание: {rel_path} ({photo.size} байт)..."
