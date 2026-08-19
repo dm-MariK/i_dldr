@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import timezone
 from pyicloud import PyiCloudService
+import logging
 
 def authenticate(apple_id):
     """
@@ -100,10 +101,13 @@ def get_photo(photo, filepath):
     download = photo.download()
     with open(filepath, "wb") as f:
         if isinstance(download, bytes):
+            logging.debug("  *** ---> isinstance(download, bytes) -> USE: f.write(download)")
             f.write(download)
         elif hasattr(download, "content"):
+            logging.debug("  *** ---> hasattr(download, 'content') -> USE: f.write(download.content)")
             f.write(download.content)
         else:
+            logging.debug("  *** --->  ---> USE: f.write(download.raw.read())")
             f.write(download.raw.read())
 
     # Set up correct file modification time (mtime)
