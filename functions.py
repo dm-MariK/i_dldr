@@ -19,7 +19,7 @@ def authenticate(apple_id):
         if not api.validate_2fa_code(code):
             print("Неверный код 2FA")
             sys.exit(1)
-        return api
+    return api
 
 def list_all_albums(api):
     """

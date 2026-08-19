@@ -31,6 +31,7 @@ import functions
 import argparse
 import logging
 import socket
+#from pyicloud import PyiCloudService
 
 # ---------------------------------------------------------------------
 def parse_timeout(value):
@@ -106,6 +107,7 @@ def main():
     
     logging.debug("authenticate on Apple iCloud")
     api = functions.authenticate(args.user)
+    
     logging.debug("Request list of all albums")
     functions.list_all_albums(api)
     
@@ -123,10 +125,6 @@ def main():
         )
         sys.exit(1)
     
-    # --- 
-    logging.debug("Prepare local directory to download to.")
-    os.makedirs(args.dir, exist_ok=True)
-    
     photos = api.photos.albums[args.album]
     
     if args.check_counts:
@@ -136,7 +134,12 @@ def main():
             f"\n⚠️ ВНИМАНИЕ! Будет произведен лишь пересчет БЕЗ реального скачивания!"
         )
         functions.check_counts(photos)
+        sys.exit(0)
         
+    # --- 
+    logging.debug("Prepare local directory to download to.")
+    os.makedirs(args.dir, exist_ok=True)
+    
     print(f"\nАльбом '{args.album}' найден! Начинаем скачивание...")
 
     # --- 
