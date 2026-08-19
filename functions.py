@@ -5,6 +5,7 @@ import sys
 from datetime import timezone
 from pyicloud import PyiCloudService
 import logging
+import shutil
 
 def authenticate(apple_id):
     """
@@ -106,9 +107,18 @@ def get_photo(photo, filepath):
         elif hasattr(download, "content"):
             logging.debug("  *** ---> hasattr(download, 'content') -> USE: f.write(download.content)")
             f.write(download.content)
+        elif hasattr(download, "raw"):
+            logging.debug("  *** --->  hasattr(download, 'raw') -> USE: f.write(download.raw.read())")
+            #f.write(download.raw.read()) # Use shutil to dowload file by chanks to preserve RAM
+            # Включаем автоматическую распаковку (если сервер отдал gzip/deflate)
+            download.raw.decode_content = True
+            shutil.copyfileobj(download.raw, f)
         else:
-            logging.debug("  *** --->  ---> USE: f.write(download.raw.read())")
-            f.write(download.raw.read())
+            print(
+                f"⚠️ Can not download file!"
+                f"\nNeither is 'bytes' instance, no has attribute 'content' or 'raw'\n"
+            )
+            
 
     # Set up correct file modification time (mtime)
     if photo.created:
