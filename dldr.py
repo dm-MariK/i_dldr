@@ -158,8 +158,44 @@ def main():
 
     # --- 
     logging.debug("Запускаем цикл скачивания с автовозобновлением при ошибке 410 (одна попытка)")
-    for idx, photo in enumerate(photos, start=1):
-        logging.debug(" * Requesting the NEXT photo object from the server ...")
+    
+    #for idx, photo in enumerate(photos, start=1): # <-------------------------------------------------
+    # Convert the album 'photos' to "manual" iterator.
+    photo_iterator = iter(photos)
+    idx = 1
+    
+    while True:
+        try:
+            #dprint(f"Запрашиваем данные объекта № {idx} у серверов Apple...")
+            # Получаем следующий файл. Если Apple тупит, через <time-out> сек вылетит ошибка
+            logging.debug(f" *** Requesting the NEXT (№ {idx}) photo object from the server ...")
+            photo = next(photo_iterator)
+        
+        except StopIteration:
+            logging.debug("   *** ---> Достигнут конец альбома. Выход из цикла.")
+            break  # Выход из цикла, так как альбом закончился
+        
+        except (socket.timeout, TimeoutError) as e:
+            print(f"   ⚠️ Сервер Apple завис при получении объекта № {idx}. Пропускаем...")
+            idx += 1
+            errors_count += 1
+            continue  # Идем к следующему
+        
+        except Exception as e:
+            print(f"   ❌ Неизвестная ошибка при получении метаданных объекта № {idx}: {e}")
+            idx += 1
+            errors_count += 1
+            continue
+        
+        # --- Если дошли сюда, объект photo успешно получен ---
+        logging.debug(f"Метаданные получены. Файл: {photo.filename}")
+        
+        # Здесь обычный код обработки: # <-------------------------------------------------------------
+        # 1. Формирование имени (YYYY-MM-DD_IMG_XXXX)
+        # 2. Проверка if os.path.exists (continue)
+        # 3. try...except для photo.download() с обработкой 410 ошибки
+    
+        #idx += 1 # Не забываем увеличивать счетчик в конце успешного круга # <------------------------
         
         #logging.debug("Generate file name and local path.")
         filepath, rel_path = functions.gen_local_path(photo, args.dir)
@@ -169,12 +205,13 @@ def main():
                 f"Объект {idx} из {total_count}. Уже скачано, пропускаем: {rel_path}"
             )
             skipped_count += 1
+            idx += 1
             continue
 
         print(
             f"Объект {idx} из {total_count}. Скачивание: {rel_path} ({photo.size} байт)..."
         )
-
+        
         try:
             logging.debug("Trying to download the given photo.")
             functions.get_photo(photo, filepath)
@@ -209,7 +246,8 @@ def main():
                     f"\n    {e}"
                 )
                 errors_count += 1
-
+        idx += 1
+    
     print(
         f"\n✅ Загрузка завершена! "
         f"\n  Всего объектов: {total_count}. Из них: "
