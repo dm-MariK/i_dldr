@@ -108,7 +108,8 @@ def get_photo(photo, filepath):
             logging.debug("  *** ---> hasattr(download, 'content') -> USE: f.write(download.content)")
             f.write(download.content)
         elif hasattr(download, "raw"):
-            logging.debug("  *** --->  hasattr(download, 'raw') -> USE: f.write(download.raw.read())")
+            logging.debug("  *** --->  hasattr(download, 'raw') -> USE: shutil.copyfileobj(download.raw, f)"
+            # f.write(download.raw.read())")
             #f.write(download.raw.read()) # Use shutil to dowload file by chanks to preserve RAM
             # Включаем автоматическую распаковку (если сервер отдал gzip/deflate)
             download.raw.decode_content = True
